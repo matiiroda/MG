@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MOCK_SERVICES, ICONS, COLORS } from '../constants';
 import { SaleItem, Sale, Product, CajaSession } from '../types';
 import ThermalTicket from '../components/ThermalTicket';
@@ -23,6 +23,16 @@ const POSView: React.FC<POSViewProps> = ({ products, caja, onConfirmSale }) => {
   const [depositValue, setDepositValue] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
+
+  // Trigger print automatically when sale is successful
+  useEffect(() => {
+    if (isSuccess && lastSale) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, lastSale]);
 
   const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const finalToPay = Math.max(0, total - depositValue);
@@ -66,21 +76,42 @@ const POSView: React.FC<POSViewProps> = ({ products, caja, onConfirmSale }) => {
     setCart([]);
   };
 
+  const handlePrintManual = () => {
+    window.print();
+  };
+
   if (isSuccess && lastSale) {
     return (
-      <div className="text-center py-20 animate-fadeIn">
+      <div className="text-center py-20 animate-fadeIn no-print">
         <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/30">
           {ICONS.Check}
         </div>
         <h2 className="text-3xl font-black text-white mb-4">COBRO EXITOSO</h2>
-        <button onClick={() => setIsSuccess(false)} className="bg-[#C5A059] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs">Nueva Venta</button>
-        <div className="print-only"><ThermalTicket {...lastSale} saleId={lastSale.id} date={lastSale.timestamp} /></div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+          <button 
+            onClick={() => setIsSuccess(false)} 
+            className="w-full sm:w-auto bg-[#1A1A1A] text-white border border-[#C5A059]/20 px-10 py-4 rounded-2xl font-black uppercase text-xs hover:bg-[#C5A059]/10 transition-all"
+          >
+            Nueva Venta
+          </button>
+          <button 
+            onClick={handlePrintManual} 
+            className="w-full sm:w-auto bg-[#C5A059] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2 shadow-xl shadow-[#C5A059]/20"
+          >
+            {ICONS.Print} Imprimir Ticket
+          </button>
+        </div>
+        
+        {/* Componente que solo se ve al imprimir */}
+        <div className="print-only fixed inset-0 bg-white flex items-start justify-center pt-10">
+          <ThermalTicket {...lastSale} saleId={lastSale.id} date={lastSale.timestamp} clientName={lastSale.clientId} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 no-print">
       <div className="lg:col-span-2 space-y-10">
         <section>
           <h3 className="text-xl font-black text-[#C5A059] uppercase tracking-[0.3em] mb-6">Tratamientos</h3>
