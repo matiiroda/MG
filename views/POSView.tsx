@@ -29,7 +29,7 @@ const POSView: React.FC<POSViewProps> = ({ products, caja, onConfirmSale, ticket
     if (isSuccess && lastSale) {
       const timer = setTimeout(() => {
         window.print();
-      }, 800);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [isSuccess, lastSale]);
@@ -83,30 +83,34 @@ const POSView: React.FC<POSViewProps> = ({ products, caja, onConfirmSale, ticket
 
   if (isSuccess && lastSale) {
     return (
-      <div className="text-center py-20 animate-fadeIn no-print h-screen flex flex-col items-center justify-center">
-        <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-8 border border-emerald-500/30">
-          <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
+      <>
+        {/* INTERFAZ DE ÉXITO (Solo pantalla) */}
+        <div className="text-center py-20 animate-fadeIn no-print h-screen flex flex-col items-center justify-center">
+          <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-8 border border-emerald-500/30">
+            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">COBRO FINALIZADO</h2>
+          <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-12">El ticket se ha enviado a la cola de impresión</p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button 
+              onClick={() => setIsSuccess(false)} 
+              className="w-full sm:w-auto bg-[#1A1A1A] text-white border border-[#C5A059]/20 px-12 py-5 rounded-2xl font-black uppercase text-xs hover:bg-[#C5A059]/10 transition-all shadow-xl"
+            >
+              Nueva Venta
+            </button>
+            <button 
+              onClick={handlePrintManual} 
+              className="w-full sm:w-auto bg-[#C5A059] text-black px-12 py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-2xl shadow-[#C5A059]/30 hover:bg-[#E2C284]"
+            >
+              {ICONS.Print} Re-imprimir Ticket
+            </button>
+          </div>
         </div>
-        <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">COBRO FINALIZADO</h2>
-        <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-12">El ticket se ha enviado a la cola de impresión</p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button 
-            onClick={() => setIsSuccess(false)} 
-            className="w-full sm:w-auto bg-[#1A1A1A] text-white border border-[#C5A059]/20 px-12 py-5 rounded-2xl font-black uppercase text-xs hover:bg-[#C5A059]/10 transition-all shadow-xl"
-          >
-            Nueva Venta
-          </button>
-          <button 
-            onClick={handlePrintManual} 
-            className="w-full sm:w-auto bg-[#C5A059] text-black px-12 py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-2xl shadow-[#C5A059]/30 hover:bg-[#E2C284]"
-          >
-            {ICONS.Print} Re-imprimir Ticket
-          </button>
-        </div>
-        
+
+        {/* TICKET REAL (Solo impresora) */}
         <div className="print-only">
           <ThermalTicket 
             {...lastSale} 
@@ -116,7 +120,7 @@ const POSView: React.FC<POSViewProps> = ({ products, caja, onConfirmSale, ticket
             config={ticketConfig}
           />
         </div>
-      </div>
+      </>
     );
   }
 
